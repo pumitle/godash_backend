@@ -7,7 +7,7 @@ const router = express.Router();
 
 router.get("/",(req,res)=>{
 
-    const sql = "select * from Membesr";
+    const sql = "select * from Membser";
     conn.query(sql,(err,result)=>{
         if(err){
             res.json(err);
