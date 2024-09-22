@@ -61,7 +61,7 @@ router.post("/login", (req, res) => {
                 if (result.length > 0) {
                     const user = result[0];
                     const userRes = {
-                        Rid: user.Uid,
+                        Rid: user.Rid,
                         name: user.name,
                         lastname: user.lastname,
                         email: user.email,
