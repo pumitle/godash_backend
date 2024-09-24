@@ -123,6 +123,86 @@ router.get("/getUser", async (req, res) => {
     }
 });
 
+//สมัคสมาชิก memeber
+router.post("/regismember",  (req,res)=> {
+    const {name,lastname,phone,email,password } = req.body;
+
+
+     // ตรวจสอบไม่ให้มีการกรอกค่าว่างหรือกรอกแต่ช่องว่าง
+  if (!name || !lastname || !phone || !email || !password ||
+    name.trim() === '' || lastname.trim() === '' || phone.trim() === '' ||
+    email.trim() === '' || password.trim() === '') {
+  return res.status(400).json({ error: 'กรุณากรอกข้อมูลให้ครบถ้วนและไม่เป็นช่องว่าง' });
+}
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+        return res.status(400).json({ error: 'Invalid email format' });
+    }
+  // ตรวจสอบว่าอีเมลหรือเบอร์โทรศัพท์มีอยู่แล้วในฐานข้อมูลหรือไม่
+    const checkQuery = 'SELECT * FROM Membser WHERE email = ? OR phone = ?';
+    conn.query(checkQuery,[email,phone],(err,result)=>{
+        if (err) {
+            console.error('Error checking existing user:', err);
+            return res.status(500).json({ error: 'Error checking existing user' });
+        }
+           // ถ้าเจอผู้ใช้ที่มีอีเมลหรือเบอร์โทรซ้ำกัน
+           if (result.length > 0) {
+            return res.status(400).json({ error: 'มีผู้ใช้ที่ใช้ email หรือเบอร์โทรนี้แล้ว' });
+          }
+        // ถ้าไม่มีผู้ใช้ซ้ำ ทำการสมัครสมาชิก
+        const query = 'INSERT INTO Membser (name,lastname, phone,email, password,type) VALUES (?, ?, ?, ?, ?,?)';
+        conn.query(query, [name, lastname,email, phone, password, 'member'], (err, result) => {
+            if (err) {
+                console.error('Error during registration:', err);
+                return res.status(500).json({ error: 'Error during registration' });
+            }
+
+            return res.status(200).json({ success: true, user: result, message: 'Register successful' });
+        });
+    });
+});
+
+
+//สมัคสมาชิก rider
+router.post("/regisrider", (req,res)=> {
+    const {name,lastname,phone,cargis,email,password } = req.body;
+
+    // ตรวจสอบไม่ให้มีการกรอกค่าว่างหรือกรอกแต่ช่องว่าง
+ if (!name || !lastname || !phone || !cargis || !email || !password ||
+   name.trim() === '' || lastname.trim() === '' || phone.trim() === '' || cargis.trim() === '' ||
+   email.trim() === '' || password.trim() === '') {
+ return res.status(400).json({ error: 'กรุณากรอกข้อมูลให้ครบถ้วนและไม่เป็นช่องว่าง' });
+}
+
+   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+   if (!emailRegex.test(email)) {
+       return res.status(400).json({ error: 'Invalid email format' });
+   }
+ // ตรวจสอบว่าอีเมลหรือเบอร์โทรศัพท์มีอยู่แล้วในฐานข้อมูลหรือไม่
+   const checkQuery = 'SELECT * FROM Rider WHERE email = ? OR phone = ?';
+   conn.query(checkQuery,[email,phone],(err,result)=>{
+       if (err) {
+           console.error('Error checking existing user:', err);
+           return res.status(500).json({ error: 'Error checking existing user' });
+       }
+          // ถ้าเจอผู้ใช้ที่มีอีเมลหรือเบอร์โทรซ้ำกัน
+          if (result.length > 0) {
+           return res.status(400).json({ error: 'มีผู้ใช้ที่ใช้ email หรือเบอร์โทรนี้แล้ว' });
+         }
+       // ถ้าไม่มีผู้ใช้ซ้ำ ทำการสมัครสมาชิก
+       const query = 'INSERT INTO Rider (name,lastname, phone,car_registration,email, password,type) VALUES (?, ?, ?, ?, ?,?,?)';
+       conn.query(query, [name, lastname, phone,cargis,email, password, 'rider'], (err, result) => {
+           if (err) {
+               console.error('Error during registration:', err);
+               return res.status(500).json({ error: 'Error during registration' });
+           }
+
+           return res.status(200).json({ success: true, user: result, message: 'Register successful' });
+       });
+   });
+});
+
 
  
 
