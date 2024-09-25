@@ -205,51 +205,51 @@ router.post("/regisrider", (req,res)=> {
 
 
 ///เส้นคนหาผู้รับจากเบอร์โทร *จะค้นหาไม่เห็นเบอร์ของตัวเอง 
-router.get("/seachrec" , async (req,res) => {
-    const phone = req.query.phone; // เบอร์โทรที่ต้องการค้นหา
-    const myPhone = req.query.myPhone; // เบอร์โทรของผู้ค้นหาเอง
+// router.get("/seachrec", async (req, res) => {
+//     const phone = req.query.phone; // เบอร์โทรที่ต้องการค้นหา
+//     const myPhone = req.query.myPhone; // เบอร์โทรของผู้ค้นหาเอง
 
-    if (!phone || !myPhone) {
-        return res.status(400).json({ error: 'กรุณาระบุเบอร์โทรที่ต้องการค้นหาและเบอร์โทรของคุณเอง' });
-    }
-    try {
-        // ตรวจสอบความยาวของเบอร์โทรที่กรอก
-        let query;
-        let params;
+//     if (!phone || !myPhone) {
+//         return res.status(400).json({ error: 'กรุณาระบุเบอร์โทรที่ต้องการค้นหาและเบอร์โทรของคุณเอง' });
+//     }
 
-        if (phone.length < 10) {
-            // ถ้าเบอร์ยังไม่ครบ 10 หลัก ให้ค้นหาข้อมูลสมาชิกที่เบอร์เริ่มต้นด้วยตัวเลขนั้น
-            query = `
-                SELECT * FROM Membser
-                WHERE phone LIKE ? AND phone != ?
-            `;
-            params = [`${phone}%`, myPhone]; // ใช้ LIKE เพื่อค้นหาเบอร์ที่ขึ้นต้นด้วย phone
-        } else {
-            // ถ้าเบอร์ครบ 10 หลักแล้ว ให้แสดงข้อมูลผู้รับนั้นโดยเฉพาะ
-            query = `
-                SELECT * FROM Membser
-                WHERE phone = ? AND phone != ?
-            `;
-            params = [phone, myPhone]; // ใช้การค้นหาที่ตรงกับเบอร์โทรทั้งหมด
-        }
+//     try {
+//         let query;
+//         let params;
 
-        // ดึงข้อมูลจาก MySQL
-        const [rows] = await conn.execute(query, params);
+//         // เช็คความยาวของเบอร์โทรที่กรอก
+//         if (phone.length < 10) {
+//             // ถ้าเบอร์ยังไม่ครบ 10 หลัก ให้ค้นหาข้อมูลสมาชิกที่มีเบอร์โทรเริ่มต้นด้วยเลขที่กรอก
+//             query = `
+//                 SELECT * FROM Membser
+//                 WHERE phone LIKE ? AND phone != ?
+//             `;
+//             params = [`${phone}%`, myPhone]; // ใช้ LIKE เพื่อค้นหาเบอร์ที่ขึ้นต้นด้วย phone
+//         } else {
+//             // ถ้าเบอร์ครบ 10 หลักแล้ว ให้แสดงข้อมูลเฉพาะผู้รับที่มีเบอร์ตรงกัน
+//             query = `
+//                 SELECT * FROM Membser
+//                 WHERE phone = ? AND phone != ?
+//             `;
+//             params = [phone, myPhone]; // ใช้การค้นหาที่ตรงกับเบอร์โทรทั้งหมด
+//         }
 
-        if (rows.length === 0) {
-            return res.status(404).json({ message: 'ไม่พบข้อมูลผู้รับ' });
-        }
+//         // ดึงข้อมูลจาก MySQL
+//         const [rows] = await queryAsync(query, params);
 
-        // ส่งข้อมูลสมาชิกที่พบกลับไป
-        return res.json(rows);
+//         if (rows.length === 0) {
+//             return res.status(404).json({ message: 'ไม่พบข้อมูลผู้รับ' });
+//         }
 
-    } catch (error) {
-        console.error('Error occurred while searching member:', error);
-        return res.status(500).json({ error: 'เกิดข้อผิดพลาดในการค้นหาผู้รับ' });
-    }
-    
+//         // ส่งข้อมูลสมาชิกที่พบกลับไป
+//         return res.json(rows);
 
-});
+//     } catch (error) {
+//         console.error('Error occurred while searching member:', error);
+//         return res.status(500).json({ error: 'เกิดข้อผิดพลาดในการค้นหาผู้รับ' });
+//     }
+// });
+
 
 
  
