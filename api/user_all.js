@@ -152,7 +152,7 @@ router.post("/regismember",  (req,res)=> {
           }
         // ถ้าไม่มีผู้ใช้ซ้ำ ทำการสมัครสมาชิก
         const query = 'INSERT INTO Membser (name,lastname, phone,email, password,type) VALUES (?, ?, ?, ?, ?,?)';
-        conn.query(query, [name, lastname,email, phone, password, 'member'], (err, result) => {
+        conn.query(query, [name, lastname,phone,email , password, 'member'], (err, result) => {
             if (err) {
                 console.error('Error during registration:', err);
                 return res.status(500).json({ error: 'Error during registration' });
@@ -201,6 +201,54 @@ router.post("/regisrider", (req,res)=> {
            return res.status(200).json({ success: true, user: result, message: 'Register successful' });
        });
    });
+});
+
+
+///เส้นคนหาผู้รับจากเบอร์โทร *จะค้นหาไม่เห็นเบอร์ของตัวเอง 
+router.get("/seachrec" , async (req,res) => {
+    const phone = req.query.phone; // เบอร์โทรที่ต้องการค้นหา
+    const myPhone = req.query.myPhone; // เบอร์โทรของผู้ค้นหาเอง
+
+    if (!phone || !myPhone) {
+        return res.status(400).json({ error: 'กรุณาระบุเบอร์โทรที่ต้องการค้นหาและเบอร์โทรของคุณเอง' });
+    }
+    try {
+        // ตรวจสอบความยาวของเบอร์โทรที่กรอก
+        let query;
+        let params;
+
+        if (phone.length < 10) {
+            // ถ้าเบอร์ยังไม่ครบ 10 หลัก ให้ค้นหาข้อมูลสมาชิกที่เบอร์เริ่มต้นด้วยตัวเลขนั้น
+            query = `
+                SELECT * FROM Membser
+                WHERE phone LIKE ? AND phone != ?
+            `;
+            params = [`${phone}%`, myPhone]; // ใช้ LIKE เพื่อค้นหาเบอร์ที่ขึ้นต้นด้วย phone
+        } else {
+            // ถ้าเบอร์ครบ 10 หลักแล้ว ให้แสดงข้อมูลผู้รับนั้นโดยเฉพาะ
+            query = `
+                SELECT * FROM Membser
+                WHERE phone = ? AND phone != ?
+            `;
+            params = [phone, myPhone]; // ใช้การค้นหาที่ตรงกับเบอร์โทรทั้งหมด
+        }
+
+        // ดึงข้อมูลจาก MySQL
+        const [rows] = await conn.execute(query, params);
+
+        if (rows.length === 0) {
+            return res.status(404).json({ message: 'ไม่พบข้อมูลผู้รับ' });
+        }
+
+        // ส่งข้อมูลสมาชิกที่พบกลับไป
+        return res.json(rows);
+
+    } catch (error) {
+        console.error('Error occurred while searching member:', error);
+        return res.status(500).json({ error: 'เกิดข้อผิดพลาดในการค้นหาผู้รับ' });
+    }
+    
+
 });
 
 
