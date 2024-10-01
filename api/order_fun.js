@@ -54,7 +54,6 @@ router.post("/addorder", async (req, res) => {
 });
 
 ///การจอยข้อมูลแสดงรายละเอียด ออร์เดอ์ กับ member 
-
 router.get("/getdetail", async (req, res) => {
     try {
         // คำสั่ง SQL สำหรับการ JOIN ตาราง Listorder และ Members
