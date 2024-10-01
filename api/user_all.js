@@ -140,7 +140,9 @@ router.post("/regismember",  (req,res)=> {
         return res.status(400).json({ error: 'Invalid email format' });
     }
   // ตรวจสอบว่าอีเมลหรือเบอร์โทรศัพท์มีอยู่แล้วในฐานข้อมูลหรือไม่
-    const checkQuery = 'SELECT * FROM Membser WHERE email = ? OR phone = ?';
+    const checkQuery =` SELECT * FROM Membser WHERE email = ? OR phone = ?
+     UNION
+        SELECT * FROM Rider WHERE phone = ?`;
     conn.query(checkQuery,[email,phone],(err,result)=>{
         if (err) {
             console.error('Error checking existing user:', err);
@@ -180,7 +182,9 @@ router.post("/regisrider", (req,res)=> {
        return res.status(400).json({ error: 'Invalid email format' });
    }
  // ตรวจสอบว่าอีเมลหรือเบอร์โทรศัพท์มีอยู่แล้วในฐานข้อมูลหรือไม่
-   const checkQuery = 'SELECT * FROM Rider WHERE email = ? OR phone = ?';
+   const checkQuery = `SELECT * FROM Rider WHERE email = ? OR phone = ?
+    UNION
+        SELECT * FROM Membser WHERE phone = ?`;
    conn.query(checkQuery,[email,phone],(err,result)=>{
        if (err) {
            console.error('Error checking existing user:', err);
