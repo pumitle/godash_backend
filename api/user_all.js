@@ -19,17 +19,17 @@ router.get("/",(req,res)=>{
 });
 
 router.post("/login", (req, res) => {
-    const { email, password } = req.body;
+    const { phone, password } = req.body;
 
-    if (!email || !password) {
-        return res.status(400).json({ error: "email and password are required" });
+    if (!phone || !password) {
+        return res.status(400).json({ error: "phone and password are required" });
     }
 
-    const sqlMembser = "SELECT * FROM Membser WHERE email = ? AND password = ?";
-    const sqlRider = "SELECT * FROM Rider WHERE email = ? AND password = ?";
+    const sqlMembser = "SELECT * FROM Membser WHERE phone = ? AND password = ?";
+    const sqlRider = "SELECT * FROM Rider WHERE phone = ? AND password = ?";
 
     // Check in Membser table
-    conn.query(sqlMembser, [email, password], (err, result) => {
+    conn.query(sqlMembser, [phone, password], (err, result) => {
         if (err) {
             return res.status(500).json({ error: "Internal Server Error" });
         }
@@ -53,7 +53,7 @@ router.post("/login", (req, res) => {
             return res.json({ message: "Login successful", user: userRes });
         } else {
             // If not found in Membser, check in Rider table
-            conn.query(sqlRider, [email, password], (err, result) => {
+            conn.query(sqlRider, [phone, password], (err, result) => {
                 if (err) {
                     return res.status(500).json({ error: "Internal Server Error" });
                 }
@@ -75,7 +75,7 @@ router.post("/login", (req, res) => {
 
                     return res.json({ message: "Login successful", user: userRes });
                 } else {
-                    return res.status(401).json({ error: "Invalid email or password" });
+                    return res.status(401).json({ error: "Invalid phone or password" });
                 }
             });
         }
