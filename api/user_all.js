@@ -125,13 +125,13 @@ router.get("/getUser", async (req, res) => {
 
 //สมัคสมาชิก memeber
 router.post("/regismember",  (req,res)=> {
-    const {name,lastname,phone,email,password } = req.body;
+    const {name,lastname,phone,email,password,address,gps,image} = req.body;
 
 
      // ตรวจสอบไม่ให้มีการกรอกค่าว่างหรือกรอกแต่ช่องว่าง
-  if (!name || !lastname || !phone || !email || !password ||
+  if (!name || !lastname || !phone || !email || !password || !address || !gps || !image ||
     name.trim() === '' || lastname.trim() === '' || phone.trim() === '' ||
-    email.trim() === '' || password.trim() === '') {
+    email.trim() === '' || password.trim() === '' || address.trim() === '' || gps.trim() === '' || image.trim() === '') {
   return res.status(400).json({ error: 'กรุณากรอกข้อมูลให้ครบถ้วนและไม่เป็นช่องว่าง' });
 }
 
@@ -140,10 +140,10 @@ router.post("/regismember",  (req,res)=> {
         return res.status(400).json({ error: 'Invalid email format' });
     }
   // ตรวจสอบว่าอีเมลหรือเบอร์โทรศัพท์มีอยู่แล้วในฐานข้อมูลหรือไม่
-    const checkQuery =` SELECT * FROM Membser WHERE email = ? OR phone = ?
+    const checkQuery =` SELECT phone FROM Membser WHERE email = ? OR phone = ?
      UNION
-        SELECT * FROM Rider WHERE phone = ?`;
-    conn.query(checkQuery,[email,phone],(err,result)=>{
+        SELECT phone FROM Rider WHERE phone = ?`;
+    conn.query(checkQuery,[email,phone,phone],(err,result)=>{
         if (err) {
             console.error('Error checking existing user:', err);
             return res.status(500).json({ error: 'Error checking existing user' });
@@ -152,9 +152,17 @@ router.post("/regismember",  (req,res)=> {
            if (result.length > 0) {
             return res.status(400).json({ error: 'มีผู้ใช้ที่ใช้ email หรือเบอร์โทรนี้แล้ว' });
           }
+
+              // แยกค่า latitude และ longitude จากตัวแปร gps
+        const [latitude, longitude] = gps.split(",").map(coord => coord.trim());
+        if (!latitude || !longitude) {
+            return res.status(400).json({ error: 'Invalid GPS format. It should be "latitude,longitude".' });
+        }
+
         // ถ้าไม่มีผู้ใช้ซ้ำ ทำการสมัครสมาชิก
-        const query = 'INSERT INTO Membser (name,lastname, phone,email, password,type) VALUES (?, ?, ?, ?, ?,?)';
-        conn.query(query, [name, lastname,phone,email , password, 'member'], (err, result) => {
+        const query = 'INSERT INTO Membser (name,lastname, phone,email, password,type,address,start_gps,image) VALUES (?, ?, ?, ?, ?,?,?,ST_GeomFromText(?),?)';
+        const gpsPoint = `POINT(${latitude} ${longitude})`; // จัดรูปแบบ GPS ที่ถูกต้อง
+        conn.query(query, [name, lastname,phone,email , password, 'member',address,gpsPoint,image], (err, result) => {
             if (err) {
                 console.error('Error during registration:', err);
                 return res.status(500).json({ error: 'Error during registration' });
@@ -168,12 +176,12 @@ router.post("/regismember",  (req,res)=> {
 
 //สมัคสมาชิก rider
 router.post("/regisrider", (req,res)=> {
-    const {name,lastname,phone,cargis,email,password } = req.body;
+    const {name,lastname,phone,cargis,email,password,image} = req.body;
 
     // ตรวจสอบไม่ให้มีการกรอกค่าว่างหรือกรอกแต่ช่องว่าง
- if (!name || !lastname || !phone || !cargis || !email || !password ||
+ if (!name || !lastname || !phone || !cargis || !email || !password || !image ||
    name.trim() === '' || lastname.trim() === '' || phone.trim() === '' || cargis.trim() === '' ||
-   email.trim() === '' || password.trim() === '') {
+   email.trim() === '' || password.trim() === '' || image.trim() === '') {
  return res.status(400).json({ error: 'กรุณากรอกข้อมูลให้ครบถ้วนและไม่เป็นช่องว่าง' });
 }
 
@@ -182,10 +190,10 @@ router.post("/regisrider", (req,res)=> {
        return res.status(400).json({ error: 'Invalid email format' });
    }
  // ตรวจสอบว่าอีเมลหรือเบอร์โทรศัพท์มีอยู่แล้วในฐานข้อมูลหรือไม่
-   const checkQuery = `SELECT * FROM Rider WHERE email = ? OR phone = ?
+   const checkQuery = `SELECT phone FROM Rider WHERE email = ? OR phone = ?
     UNION
-        SELECT * FROM Membser WHERE phone = ?`;
-   conn.query(checkQuery,[email,phone],(err,result)=>{
+        SELECT phone FROM Membser WHERE phone = ?`;
+   conn.query(checkQuery,[email,phone,phone],(err,result)=>{
        if (err) {
            console.error('Error checking existing user:', err);
            return res.status(500).json({ error: 'Error checking existing user' });
@@ -195,8 +203,8 @@ router.post("/regisrider", (req,res)=> {
            return res.status(400).json({ error: 'มีผู้ใช้ที่ใช้ email หรือเบอร์โทรนี้แล้ว' });
          }
        // ถ้าไม่มีผู้ใช้ซ้ำ ทำการสมัครสมาชิก
-       const query = 'INSERT INTO Rider (name,lastname, phone,car_registration,email, password,type) VALUES (?, ?, ?, ?, ?,?,?)';
-       conn.query(query, [name, lastname, phone,cargis,email, password, 'rider'], (err, result) => {
+       const query = 'INSERT INTO Rider (name,lastname, phone,car_registration,email, password,type,image) VALUES (?, ?, ?, ?, ?,?,?,?)';
+       conn.query(query, [name, lastname, phone,cargis,email, password, 'rider',image], (err, result) => {
            if (err) {
                console.error('Error during registration:', err);
                return res.status(500).json({ error: 'Error during registration' });
