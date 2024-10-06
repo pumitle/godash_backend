@@ -129,7 +129,7 @@ router.post("/regismember",  (req,res)=> {
 
 
      // ตรวจสอบไม่ให้มีการกรอกค่าว่างหรือกรอกแต่ช่องว่าง
-  if (!name || !lastname || !phone || !email || !password || !address  ||
+  if (!name || !lastname || !phone || !email || !password || !address  || !image ||
     name.trim() === '' || lastname.trim() === '' || phone.trim() === '' ||
     email.trim() === '' || password.trim() === '') {
   return res.status(400).json({ error: 'กรุณากรอกข้อมูลให้ครบถ้วนและไม่เป็นช่องว่าง' });
@@ -179,7 +179,7 @@ router.post("/regisrider", (req,res)=> {
     const {name,lastname,phone,cargis,email,password,image} = req.body;
 
     // ตรวจสอบไม่ให้มีการกรอกค่าว่างหรือกรอกแต่ช่องว่าง
- if (!name || !lastname || !phone || !cargis || !email || !password || 
+ if (!name || !lastname || !phone || !cargis || !email || !password || !image ||
    name.trim() === '' || lastname.trim() === '' || phone.trim() === '' || cargis.trim() === '' ||
    email.trim() === '' || password.trim() === '' ) {
  return res.status(400).json({ error: 'กรุณากรอกข้อมูลให้ครบถ้วนและไม่เป็นช่องว่าง' });
