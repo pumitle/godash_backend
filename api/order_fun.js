@@ -146,6 +146,45 @@ try {
 });
 
 
+//update Rider ใน listorder
+router.put("/uprider", async (req,res) => {
+    const {list_id , rid} = req.body;
+      // ตรวจสอบว่ามีการส่ง list_id มาหรือไม่
+    
+  if (!list_id) {
+    return res.status(400).json({ message: "จำเป็นต้องระบุ list_id." });
+}
+
+  if (!rid) {
+    return res.status(400).json({ message: "จำเป็นต้องระบุ rid." });
+}
+try {
+    // อัปเดตค่า list_id และ status ในฐานข้อมูล
+    const query = `UPDATE Listorder SET rid_fk = ? WHERE list_id = ?`;
+    const values = [rid, list_id];
+
+    // ดำเนินการคำสั่ง SQL
+    conn.query(query, values, (err, result) => {
+        if (err) {
+            console.error("เกิดข้อผิดพลาดในการอัปเดตฐานข้อมูล: ", err);
+            return res.status(500).json({ message: "ข้อผิดพลาดในการเชื่อมต่อฐานข้อมูล." });
+        }
+
+        // ตรวจสอบว่ามีการอัปเดตข้อมูลใน list_id หรือไม่
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ message: `ไม่พบรายการที่มี list_id: ${list_id}.` });
+        }
+
+        res.status(200).json({ message: `ออร์เดอร์ที่มี list_id ${list_id} ถูกอัปเดตคนขับ ${rid}.` });
+    });
+} catch (error) {
+    console.error("เกิดข้อผิดพลาดในการอัปเดต list_id: ", error);
+    res.status(500).json({ message: "ข้อผิดพลาดในเซิร์ฟเวอร์." });
+}
+
+});
+
+
 
 // ส่งออก router
 module.exports = { router };
