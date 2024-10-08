@@ -63,6 +63,7 @@ router.get("/getdetail", async (req, res) => {
                 L.image_pd,
                 L.detail,
                 L.status,
+                L.rid_fk,
                 S.mid AS sender_id,
                 S.name AS sender_name,
                 S.lastname AS sender_lastname,
