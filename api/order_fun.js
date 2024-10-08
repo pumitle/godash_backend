@@ -106,6 +106,44 @@ router.get("/getdetail", async (req, res) => {
     }
 });
 
+//Update listid
+router.put("/uplistid", async (req,res) => {
+    const { list_id , status} = req.body;
+// ตรวจสอบว่าค่า status เป็นค่าที่อนุญาต
+const allowedStatuses = ["1", "2", "3", "4"];
+if (!allowedStatuses.includes(status)) {
+    return res.status(400).json({ message: "ค่า status ไม่ถูกต้อง ค่าอนุญาตคือ '1', '2', '3', '4'." });
+}
+  // ตรวจสอบว่ามีการส่ง list_id มาหรือไม่
+  if (!list_id) {
+    return res.status(400).json({ message: "จำเป็นต้องระบุ list_id." });
+}
+
+try {
+    // อัปเดตค่า list_id และ status ในฐานข้อมูล
+    const query = `UPDATE Listorder SET status = ? WHERE list_id = ?`;
+    const values = [status, list_id];
+
+    // ดำเนินการคำสั่ง SQL
+    conn.query(query, values, (err, result) => {
+        if (err) {
+            console.error("เกิดข้อผิดพลาดในการอัปเดตฐานข้อมูล: ", err);
+            return res.status(500).json({ message: "ข้อผิดพลาดในการเชื่อมต่อฐานข้อมูล." });
+        }
+
+        // ตรวจสอบว่ามีการอัปเดตข้อมูลใน list_id หรือไม่
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ message: `ไม่พบรายการที่มี list_id: ${list_id}.` });
+        }
+
+        res.status(200).json({ message: `ออร์เดอร์ที่มี list_id ${list_id} ถูกอัปเดตเป็นสถานะ ${status}.` });
+    });
+} catch (error) {
+    console.error("เกิดข้อผิดพลาดในการอัปเดต list_id: ", error);
+    res.status(500).json({ message: "ข้อผิดพลาดในเซิร์ฟเวอร์." });
+}
+});
+
 
 
 // ส่งออก router
