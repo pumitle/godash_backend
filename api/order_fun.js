@@ -92,8 +92,8 @@ router.get("/getdetail", async (req, res) => {
                 Membser S ON L.mid_sender_fk = S.Mid
             JOIN 
                 Membser R ON L.mid_rece_fk = R.Mid
-            JOIN 
-                Rider T ON Rid = L.rid_fk
+            LEFT JOIN 
+                Rider T ON T.Rid = L.rid_fk  -- ใช้ LEFT JOIN แทน JOIN ปกติ
             ORDER BY 
                 L.list_id
         `;
@@ -114,6 +114,7 @@ router.get("/getdetail", async (req, res) => {
         });
     }
 });
+
 
 //Update listid
 router.put("/uplistid", async (req,res) => {
