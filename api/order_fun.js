@@ -84,7 +84,8 @@ router.get("/getdetail", async (req, res) => {
                 T.lastname AS rider_lastname,
                 T.email AS rider_email,
                 T.phone AS rider_phone,
-                T.image AS rider_image
+                T.image AS rider_image,
+                T.car_registration AS rider_registration
             FROM 
                 Listorder L
             JOIN 
