@@ -79,13 +79,20 @@ router.get("/getdetail", async (req, res) => {
                 R.phone AS receiver_phone,
                 R.image AS receiver_image,
                 R.address AS receiver_address,
-                R.start_gps AS receiver_start_gps
+                R.start_gps AS receiver_start_gps,
+                T.name AS rider_name,
+                T.lastname AS rider_lastname,
+                T.email AS rider_email,
+                T.phone AS rider_phone,
+                T.image AS rider_image
             FROM 
                 Listorder L
             JOIN 
                 Membser S ON L.mid_sender_fk = S.Mid
             JOIN 
                 Membser R ON L.mid_rece_fk = R.Mid
+            JOIN 
+                Rider T ON Rid = L.rid_fk
             ORDER BY 
                 L.list_id
         `;
