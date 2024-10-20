@@ -263,6 +263,40 @@ router.get("/seachrec", (req, res) => {
 });
 
 
+//อัปเดต ที่อยู่ 
+router.put("/updatememberlocation", (req, res) => {
+    const { mid, address, gps } = req.body;
+
+    // ตรวจสอบไม่ให้มีการกรอกค่าว่างหรือกรอกแต่ช่องว่าง
+    if (!mid || !address || !gps || address.trim() === '') {
+        return res.status(400).json({ error: 'กรุณากรอกข้อมูลให้ครบถ้วนและไม่เป็นช่องว่าง' });
+    }
+
+    // แยกค่า latitude และ longitude จากตัวแปร gps
+    const [latitude, longitude] = gps.split(",").map(coord => coord.trim());
+    if (!latitude || !longitude) {
+        return res.status(400).json({ error: 'รูปแบบพิกัด GPS ไม่ถูกต้อง ต้องเป็น "latitude,longitude"' });
+    }
+
+    // อัปเดตที่อยู่และพิกัด GPS ในฐานข้อมูล
+    const query = 'UPDATE Membser SET address = ?, start_gps = ST_GeomFromText(?) WHERE mid = ?';
+    const gpsPoint = `POINT(${latitude} ${longitude})`; // จัดรูปแบบ GPS ที่ถูกต้อง
+    conn.query(query, [address, gpsPoint, mid], (err, result) => {
+        if (err) {
+            console.error('เกิดข้อผิดพลาดขณะอัปเดต:', err);
+            return res.status(500).json({ error: 'เกิดข้อผิดพลาดขณะอัปเดต' });
+        }
+
+        // ตรวจสอบว่ามีการอัปเดตจริงหรือไม่
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ error: 'ไม่พบสมาชิกที่ต้องการอัปเดต' });
+        }
+
+        return res.status(200).json({ success: true, message: 'อัปเดตตำแหน่งเรียบร้อยแล้ว' });
+    });
+});
+
+
 
  
 
